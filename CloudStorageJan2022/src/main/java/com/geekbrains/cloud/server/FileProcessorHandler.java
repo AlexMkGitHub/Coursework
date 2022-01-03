@@ -12,15 +12,12 @@ public class FileProcessorHandler implements Runnable {
     private byte[] buf;
     private static final int SIZE = 256;
 
-
     public FileProcessorHandler(Socket socket) throws IOException {
         InputStream in;
         is = new DataInputStream(socket.getInputStream());
         os = new DataOutputStream(socket.getOutputStream());
         buf = new byte[SIZE];
         currentDir = new File("serverDir");
-
-
     }
 
     @Override
@@ -37,9 +34,8 @@ public class FileProcessorHandler implements Runnable {
                     Path currentPath = currentDir.toPath().resolve(fileName);
                     try (FileOutputStream fos = new FileOutputStream(currentPath.toFile())) {
                         for (int i = 0; i < (size + SIZE - 1) / SIZE; i++) {
-                           int read = is.read(buf);
-                           fos.write(buf, 0 , read);
-
+                            int read = is.read(buf);
+                            fos.write(buf, 0, read);
                         }
                     }
                     os.writeUTF("File successfully uploaded.");
@@ -49,7 +45,5 @@ public class FileProcessorHandler implements Runnable {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
     }
 }
