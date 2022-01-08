@@ -65,11 +65,14 @@ public class ClientController implements Initializable {
         }
     }
 
-    private void fillCurrentDirFiles() {
+    private void fillCurrentDirFilesClient() {
         listView.getItems().clear();
-        listViewCloud.getItems().clear();
         listView.getItems().add("..");
         listView.getItems().addAll(currentDir.list());
+    }
+
+    private void fillCurrentDirFilesServer() {
+        listViewCloud.getItems().clear();
         listViewCloud.getItems().addAll(cloudDir.list());
     }
 
@@ -81,7 +84,8 @@ public class ClientController implements Initializable {
                 Path path = currentDir.toPath().resolve(fileName);
                 if (Files.isDirectory(path)) {
                     currentDir = path.toFile();
-                    fillCurrentDirFiles();
+                    fillCurrentDirFilesClient();
+                    fillCurrentDirFilesServer();
                     textField.clear();
                 } else {
                     textField.setText(fileName);
@@ -98,7 +102,8 @@ public class ClientController implements Initializable {
             currentDir = new File(System.getProperty("user.home"));
             cloudDir = new File("serverDir");
             initClickListener();
-            fillCurrentDirFiles();
+            fillCurrentDirFilesClient();
+            fillCurrentDirFilesServer();
             Socket socket = new Socket("localhost", 8189);
             is = new DataInputStream(socket.getInputStream());
             os = new DataOutputStream(socket.getOutputStream());
