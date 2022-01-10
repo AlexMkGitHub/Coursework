@@ -91,17 +91,17 @@ public class NioEchoServer {
         }
         if (command.startsWith("cat ")) {
             System.out.println("Получена команда: cat");
-            printFileContent(channel, command);
+            printFileContent(channel);
             return;
         }
         if (command.startsWith("mkdir ")) {
             System.out.println("Получена команда: mkdir");
-            createDirectory(channel, command);
+            createDirectory(channel);
             return;
         }
         if (command.startsWith("touch ")) {
             System.out.println("Получена команда: touch");
-            emptyFile(channel, command);
+            emptyFile(channel);
             return;
         }
         System.out.println("Received: " + s);
@@ -113,14 +113,14 @@ public class NioEchoServer {
         if (!token[0].equals("ls")) {
             currentDir = token[1];
         }
-        String fileName = "..\n\r";
+        String commandMessage = "..\n\r";
         File dir = new File(currentDir);
         File[] arrFiles = dir.listFiles();
         List<File> lst = Arrays.asList(arrFiles);
-        sendCommand(channel, fileName);
+        sendCommand(channel, commandMessage);
         for (File file : lst) {
-            fileName = file.getName();
-            sendCommand(channel, fileName);
+            commandMessage = file.getName();
+            sendCommand(channel, commandMessage);
             sendCommand(channel, "\n\r");
             System.out.println(file.getName());
         }
@@ -140,7 +140,7 @@ public class NioEchoServer {
         }
     }
 
-    private void printFileContent(SocketChannel channel, String command) throws IOException {
+    private void printFileContent(SocketChannel channel) throws IOException {
         if (token.length < 2) {
             return;
         }
@@ -164,7 +164,7 @@ public class NioEchoServer {
         }
     }
 
-    private void createDirectory(SocketChannel channel, String command) throws IOException {
+    private void createDirectory(SocketChannel channel) throws IOException {
         if (token.length < 2) {
             return;
         }
@@ -181,7 +181,7 @@ public class NioEchoServer {
         }
     }
 
-    private void emptyFile(SocketChannel channel, String command) throws IOException {
+    private void emptyFile(SocketChannel channel) throws IOException {
         if (token.length < 2) {
             return;
         }
