@@ -4,18 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
+import java.nio.channels.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class NioEchoServer {
 
@@ -31,8 +25,10 @@ public class NioEchoServer {
     private ServerSocketChannel serverChannel;
     private Selector selector;
     private ByteBuffer buf;
+    private String currentDir;
 
     public NioEchoServer() throws IOException {
+        currentDir = System.getProperty("user.dir");
         buf = ByteBuffer.allocate(5);
         serverChannel = ServerSocketChannel.open();
         selector = Selector.open();
@@ -80,85 +76,113 @@ public class NioEchoServer {
         String command = s.toString();
 
         if (command.startsWith("ls\r")) {
-            filesList(channel);
+            System.out.println("Получена команда: ls");
+            filesList(channel, command);
             return;
         }
         if (command.startsWith("cd ")) {
+            System.out.println("Получена команда: cd");
             moveToDirectory(channel, command);
             return;
         }
         if (command.startsWith("cat ")) {
-            printFileContent(command);
+            System.out.println("Получена команда: cat");
+            printFileContent(channel, command);
             return;
         }
         if (command.startsWith("mkdir ")) {
-            createDirectory(command);
+            System.out.println("Получена команда: mkdir");
+            createDirectory(channel, command);
             return;
         }
         if (command.startsWith("touch ")) {
-            emptyFile(command);
+            System.out.println("Получена команда: touch");
+            emptyFile(channel, command);
             return;
         }
         System.out.println("Received: " + s);
         channel.write(ByteBuffer.wrap(s.toString().getBytes(StandardCharsets.UTF_8)));
     }
 
-    private void filesList(SocketChannel channel) throws IOException {
-        System.out.println("Получена команда: ls");
-        String currentDir = System.getProperty("user.dir");
+    private void filesList(SocketChannel channel, String command) throws IOException {
+        String[] token = command.split("\\s+");
+        if (!token[0].equals("ls")) {
+            currentDir = token[1];
+        }
         String fileName = "..\n\r";
         File dir = new File(currentDir);
         File[] arrFiles = dir.listFiles();
         List<File> lst = Arrays.asList(arrFiles);
         channel.write(ByteBuffer.wrap(fileName.getBytes(StandardCharsets.UTF_8)));
         for (File file : lst) {
-            fileName = file.getName() + "\n\r";
+            fileName = file.getName();
             channel.write(ByteBuffer.wrap(fileName.getBytes(StandardCharsets.UTF_8)));
+            channel.write(ByteBuffer.wrap("\n\r".getBytes(StandardCharsets.UTF_8)));
             System.out.println(file.getName());
         }
-    }
-
-    //перегрузка метода filesList(), для использования в других методах
-    private void filesList(SocketChannel channel, Path command) throws IOException {
-        System.out.println("Получена команда: ls");
-        String currentDir = command.toString();
-        String fileName = "..\n\r";
-        File dir = new File(currentDir);
-        File[] arrFiles = dir.listFiles();
-        List<File> lst = Arrays.asList(arrFiles);
-        channel.write(ByteBuffer.wrap(fileName.getBytes(StandardCharsets.UTF_8)));
-        for (File file : lst) {
-            fileName = file.getName() + "\n\r";
-            channel.write(ByteBuffer.wrap(fileName.getBytes(StandardCharsets.UTF_8)));
-            System.out.println(file.getName());
-        }
+        channel.write(ByteBuffer.wrap("\n\r".getBytes(StandardCharsets.UTF_8)));
     }
 
     private void moveToDirectory(SocketChannel channel, String command) throws IOException {
-        System.out.println("Получена команда: cd");
         String[] token = command.split("\\s+");
         if (token.length < 2) {
             return;
         }
-        Path dir = Paths.get(token[1]);
+        byte bytes[] = token[1].getBytes("UTF-8");
+        String value = new String(bytes, "UTF-8");
+        Path dir = Paths.get(value);
         if (Files.exists(dir)) {
-            filesList(channel, dir);
-            return;
+            filesList(channel, command);
         } else {
-            System.out.println("НЕТ ТАКОЙ ПАПКИ");
+            System.out.println("ТАКОЙ ПАПКИ НЕ СУЩЕСТВУЕТ!");
+            channel.write(ByteBuffer.wrap("ТАКОЙ ПАПКИ НЕ СУЩЕСТВУЕТ!\n\r".getBytes(StandardCharsets.UTF_8)));
         }
     }
 
-    private void printFileContent(String command) {
-        System.out.println("Получена команда: cat");
+    private void printFileContent(SocketChannel channel, String command) throws IOException {
+        String[] token = command.split("\\s+");
+        String dir = currentDir + token[1];
+        Path fileDir = Paths.get(dir);
+        if (Files.exists(fileDir)) {
+            byte[] bytes = Files.readAllBytes(fileDir);
+            String fileText = new String(bytes, StandardCharsets.UTF_8);
+            channel.write(ByteBuffer.wrap(fileText.getBytes(StandardCharsets.UTF_8)));
+            channel.write(ByteBuffer.wrap("\n\r".getBytes(StandardCharsets.UTF_8)));
+            System.out.println(fileText);
+        } else {
+            channel.write(ByteBuffer.wrap("ТАКОГО ФАЙЛА НЕ СУЩЕСТВУЕТ!\n\r".getBytes(StandardCharsets.UTF_8)));
+            System.out.println("ТАКОГО ФАЙЛА НЕ СУЩЕСТВУЕТ!");
+        }
     }
 
-    private void createDirectory(String command) {
-        System.out.println("Получена команда: mkdir");
+    private void createDirectory(SocketChannel channel, String command) throws IOException {
+        String[] token = command.split("\\s+");
+        String dir = currentDir + token[1];
+        Path currDir = Paths.get(dir);
+        if (!Files.exists(currDir)) {
+            Files.createDirectory(currDir);
+            filesList(channel, "ls");
+            channel.write(ByteBuffer.wrap("СОЗДАНА НОВАЯ ПАПКА!\n\r".getBytes(StandardCharsets.UTF_8)));
+            System.out.println("СОЗДАНА НОВАЯ ПАПКА!");
+        } else {
+            channel.write(ByteBuffer.wrap("ПАПКА УЖЕ СОЗДАНА!\n\r".getBytes(StandardCharsets.UTF_8)));
+            System.out.println("ПАПКА УЖЕ СОЗДАНА!");
+        }
     }
 
-    private void emptyFile(String command) {
-        System.out.println("Получена команда: touch");
+    private void emptyFile(SocketChannel channel, String command) throws IOException {
+        String[] token = command.split("\\s+");
+        String dir = currentDir + token[1];
+        Path currDir = Paths.get(dir);
+        if (!Files.exists(currDir)) {
+            Files.createFile(currDir);
+            filesList(channel, "ls");
+            channel.write(ByteBuffer.wrap("СОЗДАН НОВЫЙ ФАЙЛ!\n\r".getBytes(StandardCharsets.UTF_8)));
+            System.out.println("СОЗДАН НОВЫЙ ФАЙЛ!");
+        } else {
+            channel.write(ByteBuffer.wrap("ФАЙЛ УЖЕ СОЗДАН!\n\r".getBytes(StandardCharsets.UTF_8)));
+            System.out.println("ФАЙЛ УЖЕ СОЗДАН!");
+        }
     }
 
     private void handleAccept() throws IOException {
