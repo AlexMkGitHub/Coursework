@@ -141,6 +141,9 @@ public class NioEchoServer {
 
     private void printFileContent(SocketChannel channel, String command) throws IOException {
         String[] token = command.split("\\s+");
+        if (token.length < 2) {
+            return;
+        }
         String dir = currentDir + token[1];
         Path fileDir = Paths.get(dir);
         if (Files.exists(fileDir)) {
@@ -157,6 +160,9 @@ public class NioEchoServer {
 
     private void createDirectory(SocketChannel channel, String command) throws IOException {
         String[] token = command.split("\\s+");
+        if (token.length < 2) {
+            return;
+        }
         String dir = currentDir + token[1];
         Path currDir = Paths.get(dir);
         if (!Files.exists(currDir)) {
@@ -172,6 +178,9 @@ public class NioEchoServer {
 
     private void emptyFile(SocketChannel channel, String command) throws IOException {
         String[] token = command.split("\\s+");
+        if (token.length < 2) {
+            return;
+        }
         String dir = currentDir + token[1];
         Path currDir = Paths.get(dir);
         if (!Files.exists(currDir)) {
