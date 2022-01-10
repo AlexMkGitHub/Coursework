@@ -26,6 +26,7 @@ public class NioEchoServer {
     private Selector selector;
     private ByteBuffer buf;
     private String currentDir;
+    private String[] token;
 
     public NioEchoServer() throws IOException {
         currentDir = System.getProperty("user.dir");
@@ -73,7 +74,10 @@ public class NioEchoServer {
             }
             buf.clear();
         }
-        String command = s.toString();
+        String commandInput = s.toString();
+        byte[] bytes = commandInput.getBytes(StandardCharsets.UTF_8);
+        String command = new String(bytes, StandardCharsets.UTF_8);
+        token = command.split("\\s+");
 
         if (command.startsWith("ls\r")) {
             System.out.println("Получена команда: ls");
@@ -101,7 +105,7 @@ public class NioEchoServer {
             return;
         }
         System.out.println("Received: " + s);
-        channel.write(ByteBuffer.wrap(s.toString().getBytes(StandardCharsets.UTF_8)));
+        sendCommand(channel, s.toString());
     }
 
     private void filesList(SocketChannel channel, String command) throws IOException {
@@ -113,53 +117,54 @@ public class NioEchoServer {
         File dir = new File(currentDir);
         File[] arrFiles = dir.listFiles();
         List<File> lst = Arrays.asList(arrFiles);
-        channel.write(ByteBuffer.wrap(fileName.getBytes(StandardCharsets.UTF_8)));
+        sendCommand(channel, fileName);
         for (File file : lst) {
             fileName = file.getName();
-            channel.write(ByteBuffer.wrap(fileName.getBytes(StandardCharsets.UTF_8)));
-            channel.write(ByteBuffer.wrap("\n\r".getBytes(StandardCharsets.UTF_8)));
+            sendCommand(channel, fileName);
+            sendCommand(channel, "\n\r");
             System.out.println(file.getName());
         }
-        channel.write(ByteBuffer.wrap("\n\r".getBytes(StandardCharsets.UTF_8)));
+        sendCommand(channel, "\n\r");
     }
 
     private void moveToDirectory(SocketChannel channel, String command) throws IOException {
-        String[] token = command.split("\\s+");
         if (token.length < 2) {
             return;
         }
-        byte bytes[] = token[1].getBytes("UTF-8");
-        String value = new String(bytes, "UTF-8");
-        Path dir = Paths.get(value);
+        Path dir = Paths.get(token[1]);
         if (Files.exists(dir)) {
             filesList(channel, command);
         } else {
             System.out.println("ТАКОЙ ПАПКИ НЕ СУЩЕСТВУЕТ!");
-            channel.write(ByteBuffer.wrap("ТАКОЙ ПАПКИ НЕ СУЩЕСТВУЕТ!\n\r".getBytes(StandardCharsets.UTF_8)));
+            sendCommand(channel, "ТАКОЙ ПАПКИ НЕ СУЩЕСТВУЕТ!\n\r");
         }
     }
 
     private void printFileContent(SocketChannel channel, String command) throws IOException {
-        String[] token = command.split("\\s+");
         if (token.length < 2) {
             return;
         }
         String dir = currentDir + token[1];
         Path fileDir = Paths.get(dir);
         if (Files.exists(fileDir)) {
-            byte[] bytes = Files.readAllBytes(fileDir);
-            String fileText = new String(bytes, StandardCharsets.UTF_8);
-            channel.write(ByteBuffer.wrap(fileText.getBytes(StandardCharsets.UTF_8)));
-            channel.write(ByteBuffer.wrap("\n\r".getBytes(StandardCharsets.UTF_8)));
-            System.out.println(fileText);
+            if (Files.isRegularFile(fileDir)) {
+                byte[] bytes = Files.readAllBytes(fileDir);
+                String fileText = new String(bytes, StandardCharsets.UTF_8);
+                sendCommand(channel, fileText);
+                sendCommand(channel, "\n\r");
+                System.out.println(fileText);
+            } else {
+                sendCommand(channel, "НЕВОЗМОЖНО ПРОЧИТАТЬ ФАЙЛ!\n\r");
+                System.out.println("НЕВОЗМОЖНО ПРОЧИТАТЬ ФАЙЛ!");
+            }
+
         } else {
-            channel.write(ByteBuffer.wrap("ТАКОГО ФАЙЛА НЕ СУЩЕСТВУЕТ!\n\r".getBytes(StandardCharsets.UTF_8)));
+            sendCommand(channel, "ТАКОГО ФАЙЛА НЕ СУЩЕСТВУЕТ!\n\r");
             System.out.println("ТАКОГО ФАЙЛА НЕ СУЩЕСТВУЕТ!");
         }
     }
 
     private void createDirectory(SocketChannel channel, String command) throws IOException {
-        String[] token = command.split("\\s+");
         if (token.length < 2) {
             return;
         }
@@ -168,16 +173,15 @@ public class NioEchoServer {
         if (!Files.exists(currDir)) {
             Files.createDirectory(currDir);
             filesList(channel, "ls");
-            channel.write(ByteBuffer.wrap("СОЗДАНА НОВАЯ ПАПКА!\n\r".getBytes(StandardCharsets.UTF_8)));
+            sendCommand(channel, "СОЗДАНА НОВАЯ ПАПКА!\n\r");
             System.out.println("СОЗДАНА НОВАЯ ПАПКА!");
         } else {
-            channel.write(ByteBuffer.wrap("ПАПКА УЖЕ СОЗДАНА!\n\r".getBytes(StandardCharsets.UTF_8)));
+            sendCommand(channel, "ПАПКА УЖЕ СОЗДАНА!\n\r");
             System.out.println("ПАПКА УЖЕ СОЗДАНА!");
         }
     }
 
     private void emptyFile(SocketChannel channel, String command) throws IOException {
-        String[] token = command.split("\\s+");
         if (token.length < 2) {
             return;
         }
@@ -186,10 +190,10 @@ public class NioEchoServer {
         if (!Files.exists(currDir)) {
             Files.createFile(currDir);
             filesList(channel, "ls");
-            channel.write(ByteBuffer.wrap("СОЗДАН НОВЫЙ ФАЙЛ!\n\r".getBytes(StandardCharsets.UTF_8)));
+            sendCommand(channel, "СОЗДАН НОВЫЙ ФАЙЛ!\n\r");
             System.out.println("СОЗДАН НОВЫЙ ФАЙЛ!");
         } else {
-            channel.write(ByteBuffer.wrap("ФАЙЛ УЖЕ СОЗДАН!\n\r".getBytes(StandardCharsets.UTF_8)));
+            sendCommand(channel, "ФАЙЛ УЖЕ СОЗДАН!\n\r");
             System.out.println("ФАЙЛ УЖЕ СОЗДАН!");
         }
     }
@@ -198,10 +202,12 @@ public class NioEchoServer {
         SocketChannel channel = serverChannel.accept();
         channel.configureBlocking(false);
         channel.register(selector, SelectionKey.OP_READ);
-        channel.write(ByteBuffer.wrap(
-                "Hello user. Welcome to our terminal\n\r".getBytes(StandardCharsets.UTF_8)
-        ));
+        sendCommand(channel, "Hello user. Welcome to our terminal\n\r");
         System.out.println("Client accepted...");
+    }
+
+    private void sendCommand(SocketChannel channel, String message) throws IOException {
+        channel.write(ByteBuffer.wrap(message.getBytes(StandardCharsets.UTF_8)));
     }
 
     public static void main(String[] args) throws IOException {
