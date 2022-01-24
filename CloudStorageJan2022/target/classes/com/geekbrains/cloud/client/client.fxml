@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="568.0"
+            prefWidth="630.0"
+            xmlns="http://javafx.com/javafx/8"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.geekbrains.cloud.client.ClientController">
+    <ListView fx:id="clientView" layoutX="14.0" layoutY="75.0" prefHeight="450.0" prefWidth="300.0"/>
+    <ListView fx:id="serverView" layoutX="314.0" layoutY="75.0" prefHeight="450.0" prefWidth="300.0"/>
+    <Label fx:id="clientLabel" layoutX="14.0" layoutY="525.0" prefHeight="18.0" prefWidth="300.0"/>
+    <Label fx:id="serverLabel" layoutX="315.0" layoutY="525.0" prefHeight="18.0" prefWidth="300.0"/>
+    <Button layoutX="112.0" layoutY="39.0" mnemonicParsing="false" onAction="#download" prefHeight="26.0"
+            prefWidth="80.0" text="Скачать"/>
+    <Button layoutX="14.0" layoutY="39.0" mnemonicParsing="false" onAction="#upload" prefHeight="26.0" prefWidth="90.0"
+            text="Загрузить"/>
+</AnchorPane>
