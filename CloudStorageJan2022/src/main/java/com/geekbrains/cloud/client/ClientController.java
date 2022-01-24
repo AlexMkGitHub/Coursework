@@ -1,9 +1,11 @@
 package com.geekbrains.cloud.client;
 
+import com.geekbrains.cloud.utils.SenderUtils;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 
@@ -17,79 +19,85 @@ import java.util.ResourceBundle;
 public class ClientController implements Initializable {
 
     @FXML
-    public ListView<String> listView;
+    public ListView<String> clientView;
     @FXML
-    public ListView<String> listViewCloud;
+    public ListView<String> serverView;
     @FXML
     public TextField textField;
+    @FXML
+    public Label clientLabel;
+    @FXML
+    public Label serverLabel;
 
 
     private DataInputStream is;
     private DataOutputStream os;
 
     private File currentDir;
-    private File cloudDir;
+
 
     private byte[] buf;
 
-    public void sendMessage(ActionEvent actionEvent) throws IOException {
-        String fileName = textField.getText();
-        File currentFile = currentDir.toPath().resolve(fileName).toFile();
-        os.writeUTF("#SEND#FILE#");
-        os.writeUTF(fileName);
-        os.writeLong(currentFile.length());
-        try (FileInputStream is = new FileInputStream(currentFile)) {
-            while (true) {
-                int read = is.read(buf);
-                if (read == -1) {
-                    break;
-                }
-                os.write(buf, 0, read);
-            }
-        }
-        os.flush();
-        textField.clear();
-        listViewCloud.getItems().clear();
-        listViewCloud.getItems().addAll(cloudDir.list());
-//        listView.getItems().add(message);
-    }
+    private static final int SIZE = 256;
 
     private void read() {
         try {
             while (true) {
-                String message = is.readUTF();
-                Platform.runLater(() -> textField.setText(message));
+                String command = is.readUTF();
+                System.out.println("Recived client command: " + command);
+                if (command.equals("#LIST")) {
+                    Platform.runLater(() -> serverView.getItems().clear());
+
+                    int count = is.readInt();
+                    for (int i = 0; i < count; i++) {
+                        String fileName = is.readUTF();
+                        Platform.runLater(() -> serverView.getItems().add(fileName));
+                    }
+                }
+
+                if (command.equals("#SEND#FILE")) {
+                    SenderUtils.getFileFromInputStream(is, currentDir);
+                    //client state update
+                    Platform.runLater(this::fillCurrentDirFiles);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private void fillCurrentDirFilesClient() {
-        listView.getItems().clear();
-        listView.getItems().add("..");
-        listView.getItems().addAll(currentDir.list());
+    private void fillCurrentDirFiles() {
+        clientView.getItems().clear();
+        clientView.getItems().add("..");
+        clientView.getItems().addAll(currentDir.list());
+        clientLabel.setText(getClientFilesDetails());
     }
 
-    private void fillCurrentDirFilesServer() {
-        listViewCloud.getItems().clear();
-        listViewCloud.getItems().addAll(cloudDir.list());
+    private String getClientFilesDetails() {
+        File[] files = currentDir.listFiles();
+        long size = 0;
+        String label;
+        if (files != null) {
+            label = files.length + " files in current dir. ";
+            for (File file : files) {
+                size += file.length();
+            }
+            label += "Summary size: " + size + " bytes.";
+        } else {
+            label = "Current dir is empty.";
+        }
+        return label;
     }
 
     private void initClickListener() {
-        listView.setOnMouseClicked(e -> {
+        clientView.setOnMouseClicked(e -> {
             if (e.getClickCount() == 2) {
-                String fileName = listView.getSelectionModel().getSelectedItem();
+                String fileName = clientView.getSelectionModel().getSelectedItem();
                 System.out.println("Выбран файл: " + fileName);
                 Path path = currentDir.toPath().resolve(fileName);
                 if (Files.isDirectory(path)) {
                     currentDir = path.toFile();
-                    fillCurrentDirFilesClient();
-                    fillCurrentDirFilesServer();
-                    textField.clear();
-                } else {
-                    textField.setText(fileName);
-                    textField.requestFocus();
+                    fillCurrentDirFiles();
                 }
             }
         });
@@ -100,10 +108,9 @@ public class ClientController implements Initializable {
         try {
             buf = new byte[256];
             currentDir = new File(System.getProperty("user.home"));
-            cloudDir = new File("serverDir");
+            //cloudDir = new File("serverDir");
             initClickListener();
-            fillCurrentDirFilesClient();
-            fillCurrentDirFilesServer();
+            fillCurrentDirFiles();
             Socket socket = new Socket("localhost", 8189);
             is = new DataInputStream(socket.getInputStream());
             os = new DataOutputStream(socket.getOutputStream());
@@ -114,5 +121,18 @@ public class ClientController implements Initializable {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void download(ActionEvent actionEvent) throws IOException {
+        String fileName = serverView.getSelectionModel().getSelectedItem();
+        os.writeUTF("#GET#FILE");
+        os.writeUTF(fileName);
+        os.flush();
+    }
+
+    public void upload(ActionEvent actionEvent) throws IOException {
+        String fileName = clientView.getSelectionModel().getSelectedItem();
+        File currentFile = currentDir.toPath().resolve(fileName).toFile();
+        SenderUtils.loadFileOutputStream(os, currentFile);
     }
 }

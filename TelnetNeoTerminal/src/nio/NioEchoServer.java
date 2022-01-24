@@ -173,11 +173,11 @@ public class NioEchoServer {
         if (!Files.exists(currDir)) {
             Files.createDirectory(currDir);
             filesList(channel, "ls");
-            sendCommand(channel, "СОЗДАНА НОВАЯ ПАПКА!\n\r");
+            sendCommand(channel, "СОЗДАНА НОВАЯ ПАПКА " + token[1] + ".\n\r");
             System.out.println("СОЗДАНА НОВАЯ ПАПКА!");
         } else {
-            sendCommand(channel, "ПАПКА УЖЕ СОЗДАНА!\n\r");
-            System.out.println("ПАПКА УЖЕ СОЗДАНА!");
+            sendCommand(channel, "ТАКАЯ ПАПКА УЖЕ СОЗДАНА!\n\r");
+            System.out.println("ТАКАЯ ПАПКА УЖЕ СОЗДАНА!");
         }
     }
 
@@ -190,11 +190,11 @@ public class NioEchoServer {
         if (!Files.exists(currDir)) {
             Files.createFile(currDir);
             filesList(channel, "ls");
-            sendCommand(channel, "СОЗДАН НОВЫЙ ФАЙЛ!\n\r");
+            sendCommand(channel, "СОЗДАН НОВЫЙ ФАЙЛ " + token[1] + ".\n\r");
             System.out.println("СОЗДАН НОВЫЙ ФАЙЛ!");
         } else {
-            sendCommand(channel, "ФАЙЛ УЖЕ СОЗДАН!\n\r");
-            System.out.println("ФАЙЛ УЖЕ СОЗДАН!");
+            sendCommand(channel, "ТАКОЙ ФАЙЛ УЖЕ СУШЕСТВУЕТ!\n\r");
+            System.out.println("ФАЙЛ УЖЕ СУШЕСТВУЕТ!");
         }
     }
 
