@@ -1,5 +1,6 @@
 package com.geekbrains.coursework.cloudstorage;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -28,16 +29,42 @@ public class ClientController implements Initializable {
     @FXML
     public Label serverLabel;
 
-    private File currentDir;
+    private File userDir;
+    private File serverDir;
+    private Object obj;
+    private String fileName;
+    private FileUploadFile uploadFile;
+    private FileUploadClient fileUploadClient;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        userDir = new File(System.getProperty("user.home"));
+        serverDir = new File("serverDir");
         // Здесь происходит подключение к серверу
-        network = new Network();
+        network = new Network((msg) ->
+//                Platform.runLater(() -> serverView.getItems().add((String) msg[0])));
+                Platform.runLater(() -> {
+                    //serverView.getItems().clear();
+                    if (msg[0] instanceof String) {
+                        if (msg[0].toString().equals("cls")) {
+                            serverView.getItems().clear();
+                        } else serverView.getItems().add((String) msg[0]);
+                    }
+                }));
+
+
+//        if(EchoStringHandler.msg!=null){
+//            serverView.getItems().add(EchoStringHandler.msg);
+//        }
+        this.uploadFile = new FileUploadFile();
+        this.fileUploadClient = new FileUploadClient();
+        fillCurrentDirFiles();
+        initClickListener();
     }
 
+
     private String getClientFilesDetails() {
-        File[] files = currentDir.listFiles();
+        File[] files = userDir.listFiles();
         long size = 0;
         String label;
         if (files != null) {
@@ -55,25 +82,32 @@ public class ClientController implements Initializable {
     private void initClickListener() {
         clientView.setOnMouseClicked(e -> {
             if (e.getClickCount() == 2) {
-                String fileName = clientView.getSelectionModel().getSelectedItem();
+                fileName = clientView.getSelectionModel().getSelectedItem();
                 System.out.println("Выбран файл: " + fileName);
-                Path path = currentDir.toPath().resolve(fileName);
+                Path path = userDir.toPath().resolve(fileName);
                 if (Files.isDirectory(path)) {
-                    currentDir = path.toFile();
+                    userDir = path.toFile();
+                    fillCurrentDirFiles();
                 }
             }
         });
     }
 
-    public void download() throws IOException {
-        String fileName = serverView.getSelectionModel().getSelectedItem();
 
+    public void download() throws IOException {
+        fileName = serverView.getSelectionModel().getSelectedItem();
+        network.sendMesage("#GET#FILE " + fileName);
     }
 
-    public void upload() throws IOException {
+    public void upload() throws Exception {
         String fileName = clientView.getSelectionModel().getSelectedItem();
-        File currentFile = currentDir.toPath().resolve(fileName).toFile();
-
+        File currentFile = userDir.toPath().resolve(fileName).toFile();
+        System.out.println(currentFile);
+        uploadFile.setFile(currentFile);
+        String fileMd5 = currentFile.getName();
+        uploadFile.setFile_md5(fileMd5);
+        uploadFile.setStarPos(0);
+        fileUploadClient.connect(8189, "localhost", uploadFile);
     }
 
     public void sendMsgAction(ActionEvent actionEvent) {
@@ -81,4 +115,13 @@ public class ClientController implements Initializable {
         textField.clear();
         textField.requestFocus();
     }
+
+    private void fillCurrentDirFiles() {
+        clientView.getItems().clear();
+        clientView.getItems().add("..");
+        clientView.getItems().addAll(userDir.list());
+        clientLabel.setText(getClientFilesDetails());
+    }
+
+
 }
