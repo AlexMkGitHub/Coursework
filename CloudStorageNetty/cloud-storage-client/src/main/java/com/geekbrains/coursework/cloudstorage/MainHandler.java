@@ -28,24 +28,6 @@ public class MainHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 
-        ByteBuf buf = (ByteBuf) msg;
-
-        while (buf.readableBytes() > 0) {
-            System.out.print((char) buf.readByte());
-            System.out.println();
-            String s = buf.toString();
-            if (s.equals("ls")) {
-                File[] arrFiles = dir.listFiles();
-                List<File> lst = Arrays.asList(arrFiles);
-//            ctx.writeAndFlush(lst);
-                for (File file : lst) {
-                    s = file.getName();
-                    ctx.writeAndFlush(s + "\n");
-                    buf.release();
-                }
-            }else ctx.writeAndFlush(s + "\n");
-        }
-        buf.release();
     }
 
     @Override
