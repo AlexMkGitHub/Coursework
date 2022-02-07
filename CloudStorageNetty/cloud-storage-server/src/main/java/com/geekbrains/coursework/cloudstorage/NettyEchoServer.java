@@ -11,10 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 public class NettyEchoServer {
 
     public static void main(String[] args) {
-        // WebFlux reactive streams
-        // publisher subscriber
-        // queue subscription
-
         EventLoopGroup auth = new NioEventLoopGroup(1);
         EventLoopGroup worker = new NioEventLoopGroup();
 
@@ -29,9 +25,9 @@ public class NettyEchoServer {
 
             ChannelFuture future = serverBootstrap.bind(8189).sync();
             log.info("server started...");
-            future.channel().closeFuture().sync(); // wait events
+            future.channel().closeFuture().sync();
         } catch (Exception e) {
-            log.error("e=", e);
+            log.error("Exeption: ", e);
         } finally {
             auth.shutdownGracefully();
             worker.shutdownGracefully();

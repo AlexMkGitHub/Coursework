@@ -8,11 +8,11 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
-import io.netty.handler.codec.string.StringDecoder;
-import io.netty.handler.codec.string.StringEncoder;
-import io.netty.handler.ssl.ReferenceCountedOpenSslEngine;
-import io.netty.handler.ssl.ocsp.OcspClientHandler;
 import lombok.extern.slf4j.Slf4j;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+
 
 @Slf4j
 
@@ -21,8 +21,30 @@ public class Network {
     private static final String HOST = "localhost";
     private static final int PORT = 8189;
     private Callback messageCallback;
+    private boolean allRead = true;
+    private File currentDir;
+    private ClientController clientController;
+    private FileUploadFile ef;
 
-    public Network(Callback msgCallback) {
+
+    public void setCurrentDir(File currentDir) {
+        this.currentDir = currentDir;
+    }
+
+    public File getCurrentDir() {
+        return currentDir;
+    }
+
+    public SocketChannel getChannel() {
+        return channel;
+    }
+
+    public boolean isAllRead() {
+        return allRead;
+    }
+
+    public Network(Callback msgCallback, ClientController clientController) {
+        this.clientController = clientController;
         this.messageCallback = msgCallback;
         Thread thread = new Thread(() -> {
             EventLoopGroup workerGroup = new NioEventLoopGroup();
@@ -34,15 +56,18 @@ public class Network {
                             @Override
                             protected void initChannel(SocketChannel socketChannel) throws Exception {
                                 channel = socketChannel;
-                                socketChannel.pipeline().addLast(new ObjectEncoder(), new ObjectDecoder(ClassResolvers.cacheDisabled(null)), new EchoObjHandler() {
+                                socketChannel.pipeline().addLast(new ObjectEncoder(),
+                                        new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)),
+                                        new EchoObjHandler() {
 
-                                    @Override
-                                    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-                                        if (msgCallback != null) {
-                                            msgCallback.callback(msg);
-                                        }
-                                    }
-                                });
+                                            @Override
+                                            public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+                                                if (msgCallback != null) {
+                                                    msgCallback.callback(msg);
+                                                }
+                                                getFile(msg);
+                                            }
+                                        });
                             }
                         });
                 ChannelFuture future = b.connect(HOST, PORT);
@@ -58,7 +83,28 @@ public class Network {
         thread.start();
     }
 
-    public void sendMesage(Object obj) {
-        channel.writeAndFlush(obj);
+    public void sendMessage(Object msg) {
+        allRead = false;
+        channel.writeAndFlush(msg);
     }
+
+    public void getFile(Object msg) throws IOException {
+        ef = (FileUploadFile) msg;
+        if (ef.getCommand() == null) {
+            ef.setCommand("#LIST");
+            channel.writeAndFlush(ef);
+            clientController.fillCurrentDirFiles();
+        } else if (ef.getCommand().equals("#GET#FILE")) {
+            String fileName = ef.getFileName();
+            byte[] bytes = ef.getBytes();
+            Files.write(currentDir.toPath().resolve(fileName), bytes);
+            ef.setCommand("#LIST");
+            channel.writeAndFlush(ef);
+            clientController.fillCurrentDirFiles();
+            log.info("Файл, полученный от клиента, обрабатывается ...");
+        }
+
+    }
+
+
 }

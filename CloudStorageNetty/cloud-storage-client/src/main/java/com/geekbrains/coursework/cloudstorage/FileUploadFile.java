@@ -3,34 +3,47 @@ package com.geekbrains.coursework.cloudstorage;
 import java.io.File;
 import java.io.Serializable;
 
-/**
- * Created by haoxy on 2018/11/15.
- * E-mail:hxyHelloWorld@163.com
- * github:https://github.com/haoxiaoyong1014
- */
 public class FileUploadFile implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    private File file;// 文件
-    private String file_md5;// 文件名
-    private int starPos;// 开始位置
-    private byte[] bytes;// 文件字节数组
-    private int endPos;// 结尾位置
+    private File file;
+    private String fileName;
+    private int starPos;
+    private byte[] bytes;
+    private int endPos;
+    private String path;
+    private String command;
 
     public File getFile() {
         return file;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public String getCommand() {
+        return command;
+    }
+
+    public void setCommand(String command) {
+        this.command = command;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
     }
 
     public void setFile(File file) {
         this.file = file;
     }
 
-    public String getFile_md5() {
-        return file_md5;
+    public String getFileName() {
+        return fileName;
     }
 
-    public void setFile_md5(String file_md5) {
-        this.file_md5 = file_md5;
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     public int getStarPos() {
