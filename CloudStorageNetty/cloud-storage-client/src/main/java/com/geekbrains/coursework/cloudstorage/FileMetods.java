@@ -2,25 +2,18 @@ package com.geekbrains.coursework.cloudstorage;
 
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.VBox;
-
 import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.ResourceBundle;
+
 
 public class FileMetods {
 
@@ -64,7 +57,7 @@ public class FileMetods {
         Path currentPath = clientController.currentDir.toPath().normalize();
         File currentFile = currentPath.resolve(fileName).toFile();
         if (currentFile.exists()) {
-            clientController.clientLabel.setText("На компютере ФАЙЛ С ТАКИМ ИМЕНЕМ УЖЕ СУЩЕСТВУЕТ!!!!!!");
+            clientController.clientLabel.setText("На компьютере ФАЙЛ С ТАКИМ ИМЕНЕМ УЖЕ СУЩЕСТВУЕТ!!!!!!");
             return;
         } else {
             clientController.generalPanel.setOpacity(0.50f);
