@@ -3,30 +3,47 @@ package com.geekbrains.coursework.cloudstorage;
 import java.io.File;
 import java.io.Serializable;
 
-
 public class FileUploadFile implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private File file;
-    private String file_md5;
+    private String fileName;
     private int starPos;
     private byte[] bytes;
     private int endPos;
+    private String path;
+    private String command;
 
     public File getFile() {
         return file;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public String getCommand() {
+        return command;
+    }
+
+    public void setCommand(String command) {
+        this.command = command;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
     }
 
     public void setFile(File file) {
         this.file = file;
     }
 
-    public String getFile_md5() {
-        return file_md5;
+    public String getFileName() {
+        return fileName;
     }
 
-    public void setFile_md5(String file_md5) {
-        this.file_md5 = file_md5;
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     public int getStarPos() {

@@ -3,14 +3,16 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="568.0"
-            prefWidth="630.0" xmlns="http://javafx.com/javafx/8"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.geekbrains.coursework.cloudstorage.ClientController">
+<AnchorPane fx:id="generalPanel" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="568.0" prefWidth="630.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.geekbrains.coursework.cloudstorage.ClientController">
     <ListView fx:id="clientView" layoutX="14.0" layoutY="75.0" prefHeight="450.0" prefWidth="300.0" />
     <ListView fx:id="serverView" layoutX="314.0" layoutY="75.0" prefHeight="450.0" prefWidth="300.0" />
+   <TextArea fx:id="textArea" editable="false" layoutX="315.0" layoutY="75.0" prefHeight="450.0" prefWidth="300.0" visible="false" />
     <Button layoutX="112.0" layoutY="39.0" mnemonicParsing="false" onAction="#download" prefHeight="26.0" prefWidth="80.0" text="Скачать" />
     <Button layoutX="14.0" layoutY="39.0" mnemonicParsing="false" onAction="#upload" prefHeight="26.0" prefWidth="90.0" text="Загрузить" />
+    <Button fx:id="readFile" layoutX="200.0" layoutY="39.0" mnemonicParsing="false" onAction="#read" prefHeight="26.0" prefWidth="90.0" text="Прочитать" />
+   <MenuButton fx:id="menuBtn" layoutX="300.0" layoutY="39.0" mnemonicParsing="false" text="Disk" />
+   <Button fx:id="newDir" layoutX="370.0" layoutY="39.0" mnemonicParsing="false" onAction="#createNewDir" text="New Dir" />
+   <Button fx:id="newFile" layoutX="455.0" layoutY="39.0" mnemonicParsing="false" onAction="#createNewFile" text="New File" />
     <TextField fx:id="textField" layoutX="14.0" layoutY="530.0" onAction="#sendMsgAction" prefHeight="26.0" prefWidth="300.0" promptText="Введите сообщение ..." />
    <Label fx:id="clientLabel" layoutX="324.0" layoutY="530.0" prefHeight="26.0" prefWidth="291.0" text="File info" />
 </AnchorPane>
