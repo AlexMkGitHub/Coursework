@@ -18,10 +18,7 @@ public class NettyEchoServer {
             ServerBootstrap serverBootstrap = new ServerBootstrap();
             serverBootstrap.channel(NioServerSocketChannel.class)
                     .group(auth, worker)
-//                    .childHandler(new EchoStringPipeLine());
-//                    .childHandler(new SerializablePipeline());
                     .childHandler(new SerializablePipeline());
-
 
             ChannelFuture future = serverBootstrap.bind(8189).sync();
             log.info("server started...");

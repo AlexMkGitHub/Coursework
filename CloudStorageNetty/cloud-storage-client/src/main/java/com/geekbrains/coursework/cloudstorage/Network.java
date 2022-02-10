@@ -93,14 +93,14 @@ public class Network {
         if (ef.getCommand() == null) {
             ef.setCommand("#LIST");
             channel.writeAndFlush(ef);
-            clientController.fillCurrentDirFiles();
+            clientController.fileMetods.fillCurrentDirFiles();
         } else if (ef.getCommand().equals("#GET#FILE")) {
             String fileName = ef.getFileName();
             byte[] bytes = ef.getBytes();
             Files.write(currentDir.toPath().resolve(fileName), bytes);
             ef.setCommand("#LIST");
             channel.writeAndFlush(ef);
-            clientController.fillCurrentDirFiles();
+            clientController.fileMetods.fillCurrentDirFiles();
             log.info("Файл, полученный от клиента, обрабатывается ...");
         }
 

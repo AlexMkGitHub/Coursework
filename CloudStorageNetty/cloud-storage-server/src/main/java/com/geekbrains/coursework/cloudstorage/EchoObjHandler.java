@@ -7,34 +7,32 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
 public class EchoObjHandler extends ChannelInboundHandlerAdapter {
-    private int byteRead;
-    private static final int SIZE = 256;
-    private volatile int start = 0;
-    private Path serverDir = Paths.get("serverDir").normalize();
     private File currentDir = new File("serverDir");
     private FileUploadFile ef;
     private FileUploadFile fileUploadFile;
     private FileUploadFile commandFile;
+    private File currentFile;
+    private Path currentFilePath;
+    private String fileName;
 
     @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+    public void channelActive(ChannelHandlerContext ctx) {
         log.info("Client connected");
         listServerFile(ctx);
     }
 
     @Override
-    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+    public void channelInactive(ChannelHandlerContext ctx) {
         log.info("Client disconnected from server!");
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+    public void channelRead(ChannelHandlerContext ctx, Object msg) {
         if (msg instanceof FileUploadFile) {
             fileUploadFile = (FileUploadFile) msg;
 
@@ -58,14 +56,10 @@ public class EchoObjHandler extends ChannelInboundHandlerAdapter {
                 createNewFile(ctx, msg);
             }
         }
-
     }
 
     private void createNewFile(ChannelHandlerContext ctx, Object msg) {
-        ef = (FileUploadFile) msg;
-        String fileName = ef.getFileName();
-        File currentFile = currentDir.toPath().resolve(fileName).toFile();
-        Path currentFilePath = currentDir.toPath().resolve(fileName).normalize();
+        getFileInfo(msg);
         System.out.println(Files.exists(currentFile.toPath()));
         System.out.println(currentFilePath);
         if (!Files.exists(currentFile.toPath())) {
@@ -80,10 +74,7 @@ public class EchoObjHandler extends ChannelInboundHandlerAdapter {
     }
 
     private void createNewDir(ChannelHandlerContext ctx, Object msg) {
-        ef = (FileUploadFile) msg;
-        String fileName = ef.getFileName();
-        File currentFile = currentDir.toPath().resolve(fileName).toFile();
-        Path currentFilePath = currentDir.toPath().resolve(fileName).normalize();
+        getFileInfo(msg);
         System.out.println(Files.exists(currentFile.toPath()));
         System.out.println(currentFilePath);
         if (!Files.exists(currentFile.toPath())) {
@@ -98,11 +89,7 @@ public class EchoObjHandler extends ChannelInboundHandlerAdapter {
     }
 
     private void getFileFromCloud(ChannelHandlerContext ctx, Object msg) {
-        ef = (FileUploadFile) msg;
-        String fileName = ef.getFileName();
-        System.out.println(fileName);
-        File currentFile = currentDir.toPath().resolve(fileName).toFile();
-        Path currentFilePath = currentDir.toPath().resolve(fileName).normalize();
+        getFileInfo(msg);
         System.out.println(currentFile);
         this.ef = new FileUploadFile();
         ef.setFile(currentFile);
@@ -127,7 +114,7 @@ public class EchoObjHandler extends ChannelInboundHandlerAdapter {
 
     private void addFileInCloud(ChannelHandlerContext ctx, Object msg) {
         ef = (FileUploadFile) msg;
-        String fileName = ef.getFileName();
+        fileName = ef.getFileName();
         byte[] bytes = ef.getBytes();
         try {
             Files.write(currentDir.toPath().resolve(fileName), bytes);
@@ -149,8 +136,14 @@ public class EchoObjHandler extends ChannelInboundHandlerAdapter {
         for (File file : lst) {
             commandFile.setCommand(file.getName());
             ctx.writeAndFlush(commandFile);
-            //ctx.writeAndFlush("lst");
         }
+    }
+
+    private void getFileInfo(Object msg) {
+        ef = (FileUploadFile) msg;
+        fileName = ef.getFileName();
+        currentFile = currentDir.toPath().resolve(fileName).toFile();
+        currentFilePath = currentDir.toPath().resolve(fileName).normalize();
     }
 
 }
