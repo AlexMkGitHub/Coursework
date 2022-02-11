@@ -19,16 +19,23 @@ public class EchoObjHandler extends ChannelInboundHandlerAdapter {
     private File currentFile;
     private Path currentFilePath;
     private String fileName;
+    private ServerController sc;
+
+    public EchoObjHandler(ServerController sc) {
+        this.sc = sc;
+    }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
-        log.info("Client connected");
+        log.info("Клиент подключился к серверу!");
+        sc.serverInfo.appendText("Клиент подключился к серверу!\n");
         listServerFile(ctx);
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
-        log.info("Client disconnected from server!");
+        log.info("Клиент отключился от серврера!");
+        sc.serverInfo.appendText("Клиент отключился от серврера!\n");
     }
 
     @Override
@@ -60,44 +67,39 @@ public class EchoObjHandler extends ChannelInboundHandlerAdapter {
 
     private void createNewFile(ChannelHandlerContext ctx, Object msg) {
         getFileInfo(msg);
-        System.out.println(Files.exists(currentFile.toPath()));
-        System.out.println(currentFilePath);
         if (!Files.exists(currentFile.toPath())) {
             try {
                 Files.createFile(currentFile.toPath());
                 listServerFile(ctx);
-                System.out.println("Создан файл " + fileName);
+                sc.serverInfo.appendText("Создан файл  " + fileName + "\n");
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } else System.out.println("ТАКОЙ ФАЙЛ УЖЕ СОЗДАНА!");
+        } else sc.serverInfo.appendText("ФАЙЛ " + fileName + " УЖЕ СОЗДАН!\n");
     }
 
     private void createNewDir(ChannelHandlerContext ctx, Object msg) {
         getFileInfo(msg);
-        System.out.println(Files.exists(currentFile.toPath()));
-        System.out.println(currentFilePath);
         if (!Files.exists(currentFile.toPath())) {
             try {
                 Files.createDirectory(currentFile.toPath());
                 listServerFile(ctx);
-                System.out.println("Создана папка " + fileName);
+                sc.serverInfo.appendText("Создана папка  " + fileName + "\n");
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } else System.out.println("ТАКАЯ ПАПКА УЖЕ СОЗДАНА!");
+        } else sc.serverInfo.appendText("ПАПКА " + fileName + " УЖЕ СОЗДАНА!\n");
     }
 
     private void getFileFromCloud(ChannelHandlerContext ctx, Object msg) {
         getFileInfo(msg);
-        System.out.println(currentFile);
         this.ef = new FileUploadFile();
         ef.setFile(currentFile);
         String currentFileName = currentFile.getName();
         ef.setFileName(currentFileName);
         ef.setStarPos(0);
         ef.setCommand("#GET#FILE");
-        System.out.println(ef.getFileName());
         try {
             currentFilePath = currentFilePath.toAbsolutePath().normalize();
             ef.setBytes(Files.readAllBytes(currentFilePath));
@@ -105,7 +107,7 @@ public class EchoObjHandler extends ChannelInboundHandlerAdapter {
             e.printStackTrace();
         }
         ctx.writeAndFlush(ef);
-        System.out.println("Файл " + fileName + " отправлен.");
+        sc.serverInfo.appendText("Файл " + fileName + " отправлен.\n");
         listServerFile(ctx);
         commandFile = new FileUploadFile();
         commandFile.setCommand("#VISIBLE");
@@ -124,7 +126,7 @@ public class EchoObjHandler extends ChannelInboundHandlerAdapter {
         commandFile = new FileUploadFile();
         commandFile.setCommand("#VISIBLE");
         ctx.writeAndFlush(commandFile);
-        log.info("Файл, полученный от клиента, обрабатывается ...");
+        sc.serverInfo.appendText("Получен файл " + fileName + " \n");
     }
 
     private void listServerFile(ChannelHandlerContext ctx) {

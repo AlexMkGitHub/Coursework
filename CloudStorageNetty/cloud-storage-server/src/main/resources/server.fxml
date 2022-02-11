@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.geekbrains.coursework.cloudstorage.ServerController">
+   <children>
+      <Button fx:id="serverStart" alignment="CENTER" defaultButton="true" layoutX="218.0" layoutY="243.0" mnemonicParsing="false" onAction="#startServer" prefHeight="46.0" prefWidth="163.0" text="Запуск сервера" textAlignment="CENTER" AnchorPane.bottomAnchor="111.0">
+         <effect>
+            <DropShadow />
+         </effect>
+      </Button>
+      <Button fx:id="serverStop" cancelButton="true" contentDisplay="CENTER" layoutX="218.0" layoutY="323.0" mnemonicParsing="false" onAction="#stopServer" prefHeight="46.0" prefWidth="163.0" text="Остановка сервера" textAlignment="CENTER" AnchorPane.bottomAnchor="30.600000000000023">
+         <effect>
+            <DropShadow />
+         </effect>
+      </Button>
+      <TextArea fx:id="serverInfo" editable="false" layoutX="18.0" layoutY="14.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="204.0" prefWidth="560.0" AnchorPane.bottomAnchor="192.4" AnchorPane.leftAnchor="18.0" AnchorPane.rightAnchor="22.0" AnchorPane.topAnchor="14.0">
+         <effect>
+            <DropShadow />
+         </effect>
+      </TextArea>
+   </children>
+   <effect>
+      <DropShadow />
+   </effect>
+</AnchorPane>

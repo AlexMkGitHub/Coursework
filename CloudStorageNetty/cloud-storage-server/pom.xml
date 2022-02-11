@@ -16,4 +16,32 @@
         <maven.compiler.target>8</maven.compiler.target>
     </properties>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <finalName>cloud-storage</finalName>
+                    <appendAssemblyId>false</appendAssemblyId>
+                    <archive>
+                        <manifest>
+                            <mainClass>com.geekbrains.coursework.cloudstorage.NettyEchoServer</mainClass>
+                        </manifest>
+                    </archive>
+                    <descriptorRefs>jar-with-dependencies</descriptorRefs>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>

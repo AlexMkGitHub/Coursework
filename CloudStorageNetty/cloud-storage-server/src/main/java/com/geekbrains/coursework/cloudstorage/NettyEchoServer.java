@@ -9,25 +9,39 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class NettyEchoServer {
+    protected EventLoopGroup auth;
+    protected EventLoopGroup worker;
 
-    public static void main(String[] args) {
-        EventLoopGroup auth = new NioEventLoopGroup(1);
-        EventLoopGroup worker = new NioEventLoopGroup();
+    private ServerController sc;
 
-        try {
-            ServerBootstrap serverBootstrap = new ServerBootstrap();
-            serverBootstrap.channel(NioServerSocketChannel.class)
-                    .group(auth, worker)
-                    .childHandler(new SerializablePipeline());
+    public NettyEchoServer(ServerController sc) {
+        this.sc = sc;
+    }
 
-            ChannelFuture future = serverBootstrap.bind(8189).sync();
-            log.info("server started...");
-            future.channel().closeFuture().sync();
-        } catch (Exception e) {
-            log.error("Exeption: ", e);
-        } finally {
-            auth.shutdownGracefully();
-            worker.shutdownGracefully();
-        }
+    public void start() {
+        Thread thread = new Thread(() -> {
+            this.auth = new NioEventLoopGroup(1);
+            this.worker = new NioEventLoopGroup();
+
+            try {
+                ServerBootstrap serverBootstrap = new ServerBootstrap();
+                serverBootstrap.channel(NioServerSocketChannel.class)
+                        .group(auth, worker)
+                        .childHandler(new SerializablePipeline(sc));
+
+                ChannelFuture future = serverBootstrap.bind(8189).sync();
+                sc.serverInfo.setText("Сервер запущен...\n");
+                future.channel().closeFuture().sync();
+            } catch (Exception e) {
+                sc.serverInfo.appendText("Ошибка: " + e + "\n");
+            } finally {
+                auth.shutdownGracefully();
+                worker.shutdownGracefully();
+                sc.serverInfo.appendText("Сервер остановлен!!!\n");
+            }
+        });
+        thread.setDaemon(true);
+        thread.start();
+
     }
 }

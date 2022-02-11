@@ -7,6 +7,11 @@ import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 
 public class SerializablePipeline extends ChannelInitializer<SocketChannel> {
+    private ServerController sc;
+
+    public SerializablePipeline(ServerController sc) {
+        this.sc = sc;
+    }
 
     @Override
     protected void initChannel(SocketChannel channel) throws Exception {
@@ -14,7 +19,7 @@ public class SerializablePipeline extends ChannelInitializer<SocketChannel> {
                 .addLast(
                         new ObjectEncoder(),
                         new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)),
-                        new EchoObjHandler()
+                        new EchoObjHandler(sc)
 
                 );
     }
