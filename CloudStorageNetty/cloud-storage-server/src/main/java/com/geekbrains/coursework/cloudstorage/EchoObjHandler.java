@@ -13,7 +13,7 @@ import java.util.List;
 
 @Slf4j
 public class EchoObjHandler extends ChannelInboundHandlerAdapter {
-    private File currentDir = new File("serverDir");
+    private File currentDir;
     private FileUploadFile ef;
     private FileUploadFile fileUploadFile;
     private FileUploadFile commandFile;
@@ -23,9 +23,16 @@ public class EchoObjHandler extends ChannelInboundHandlerAdapter {
     private ServerController sc;
     private SocketChannel channel;
 
+
     public EchoObjHandler(ServerController sc, SocketChannel channel) {
         this.channel = channel;
         this.sc = sc;
+        try {
+            createUserDir("CloudDir");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     @Override
@@ -152,4 +159,13 @@ public class EchoObjHandler extends ChannelInboundHandlerAdapter {
         currentFilePath = currentDir.toPath().resolve(fileName).normalize();
     }
 
+    private void createUserDir(final String dirName) throws IOException {
+        File userDir = new File(System.getProperty("user.home"));
+        currentDir = new File(userDir, dirName);
+        if (!currentDir.exists() && !currentDir.mkdirs()) {
+            throw new IOException("Папка для облака отсутствует: " + currentDir.getAbsolutePath());
+        } else {
+            sc.serverInfo.appendText("Выбрано облачное хранилище " + currentDir.getAbsolutePath() + "\n");
+        }
+    }
 }

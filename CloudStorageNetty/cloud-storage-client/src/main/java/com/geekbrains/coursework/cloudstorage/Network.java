@@ -71,35 +71,26 @@ public class Network {
                                             }
 
                                             @Override
-                                            public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
-                                                //super.channelRegistered(ctx);
-                                                System.out.println("REEEGGG");
-                                            }
-
-                                            @Override
                                             public void channelActive(ChannelHandlerContext ctx) throws Exception {
-                                                //super.channelActive(ctx);
-                                                System.out.println("ACTIVEEEE");
                                                 clientController.generalPanel.setOpacity(1.0);
                                                 clientController.setChannelActive(true);
                                                 clientController.buttonPanel.setDisable(false);
                                                 clientController.connected.setVisible(false);
-
                                                 Platform.runLater(() -> clientController.serverLabel
                                                         .setText("Облачное хранилище."));
+                                                clientController.clientView.refresh();
+                                                clientController.serverView.refresh();
 
                                             }
 
                                             @Override
                                             public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-                                                //super.channelInactive(ctx);
                                                 clientController.generalPanel.setOpacity(1.0);
                                                 clientController.setChannelActive(false);
                                                 clientController.connected.setVisible(true);
                                                 clientController.buttonPanel.setDisable(true);
                                                 Platform.runLater(() -> clientController.serverLabel
                                                         .setText("Отсутствует подключение к серверу!"));
-                                                System.out.println("DISCONNECTTTT");
                                                 ctx.channel().close();
                                             }
 
@@ -137,7 +128,6 @@ public class Network {
             ef.setCommand("#LIST");
             channel.writeAndFlush(ef);
             clientController.fileMetods.fillCurrentDirFiles();
-            log.info("Файл, полученный от клиента, обрабатывается ...");
         }
 
     }

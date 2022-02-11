@@ -27,7 +27,7 @@
                     <appendAssemblyId>false</appendAssemblyId>
                     <archive>
                         <manifest>
-                            <mainClass>com.geekbrains.coursework.cloudstorage.NettyEchoServer</mainClass>
+                            <mainClass>com.geekbrains.coursework.cloudstorage.ServerApp</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>jar-with-dependencies</descriptorRefs>
