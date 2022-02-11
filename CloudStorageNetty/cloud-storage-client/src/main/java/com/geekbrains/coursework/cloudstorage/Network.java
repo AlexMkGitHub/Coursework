@@ -8,7 +8,9 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
+import javafx.application.Platform;
 import lombok.extern.slf4j.Slf4j;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -67,6 +69,40 @@ public class Network {
                                                 }
                                                 getFile(msg);
                                             }
+
+                                            @Override
+                                            public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
+                                                //super.channelRegistered(ctx);
+                                                System.out.println("REEEGGG");
+                                            }
+
+                                            @Override
+                                            public void channelActive(ChannelHandlerContext ctx) throws Exception {
+                                                //super.channelActive(ctx);
+                                                System.out.println("ACTIVEEEE");
+                                                clientController.generalPanel.setOpacity(1.0);
+                                                clientController.setChannelActive(true);
+                                                clientController.buttonPanel.setDisable(false);
+                                                clientController.connected.setVisible(false);
+
+                                                Platform.runLater(() -> clientController.serverLabel
+                                                        .setText("Облачное хранилище."));
+
+                                            }
+
+                                            @Override
+                                            public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+                                                //super.channelInactive(ctx);
+                                                clientController.generalPanel.setOpacity(1.0);
+                                                clientController.setChannelActive(false);
+                                                clientController.connected.setVisible(true);
+                                                clientController.buttonPanel.setDisable(true);
+                                                Platform.runLater(() -> clientController.serverLabel
+                                                        .setText("Отсутствует подключение к серверу!"));
+                                                System.out.println("DISCONNECTTTT");
+                                                ctx.channel().close();
+                                            }
+
                                         });
                             }
                         });

@@ -7,43 +7,157 @@
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
 
-<AnchorPane fx:id="generalPanel" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.geekbrains.coursework.cloudstorage.ClientController">
-   <GridPane layoutY="76.0" prefHeight="497.0" prefWidth="671.0">
-     <columnConstraints>
-       <ColumnConstraints hgrow="SOMETIMES" maxWidth="440.79998779296875" minWidth="10.0" prefWidth="329.5999755859375" />
-       <ColumnConstraints hgrow="SOMETIMES" maxWidth="479.1999969482422" minWidth="10.0" prefWidth="342.4000244140625" />
-     </columnConstraints>
-     <rowConstraints>
-       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-     </rowConstraints>
-      <children>
-      
-          <ListView fx:id="clientView" prefHeight="450.0" prefWidth="300.0">
-            <GridPane.margin>
-               <Insets bottom="5.0" left="15.0" right="7.0" top="5.0" />
-            </GridPane.margin>
-         </ListView>
-          <ListView fx:id="serverView" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="450.0" prefWidth="300.0" GridPane.columnIndex="1">
-            <GridPane.margin>
-               <Insets bottom="5.0" left="7.0" right="15.0" top="5.0" />
-            </GridPane.margin>
-         </ListView>
-      </children>
-   </GridPane>
-    <TextArea fx:id="textArea" editable="false" layoutX="315.0" layoutY="75.0" prefHeight="450.0" prefWidth="300.0" visible="false" />
-    <Button layoutX="112.0" layoutY="39.0" mnemonicParsing="false" onAction="#download" prefHeight="26.0" prefWidth="80.0" text="Скачать" />
-    <Button layoutX="14.0" layoutY="39.0" mnemonicParsing="false" onAction="#upload" prefHeight="26.0" prefWidth="90.0" text="Загрузить" />
-    <Button fx:id="readFile" layoutX="200.0" layoutY="39.0" mnemonicParsing="false" onAction="#read" prefHeight="26.0" prefWidth="90.0" text="Прочитать" />
-    <MenuButton fx:id="menuBtn" layoutX="300.0" layoutY="39.0" mnemonicParsing="false" text="Disk" />
-    <Button fx:id="newDir" layoutX="370.0" layoutY="39.0" mnemonicParsing="false" onAction="#createNewDir" text="New Dir" />
-    <Button fx:id="newFile" layoutX="455.0" layoutY="39.0" mnemonicParsing="false" onAction="#createNewFile" text="New File" />
-    <TextField fx:id="textField" layoutX="24.0" layoutY="530.0" onAction="#sendMsgAction" prefHeight="26.0" prefWidth="300.0" promptText="Введите сообщение ..." />
-    <Label fx:id="clientLabel" layoutX="340.0" layoutY="530.0" prefHeight="26.0" prefWidth="291.0" text="File info" />
-</AnchorPane>
+<VBox fx:id="generalPanel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.geekbrains.coursework.cloudstorage.ClientController">
+   <children>
+      <HBox minHeight="-Infinity" minWidth="-Infinity" prefWidth="1003.0">
+         <children>
+            <MenuButton fx:id="menuBtn" alignment="TOP_LEFT" contentDisplay="TOP" mnemonicParsing="false" text="Disk">
+               <HBox.margin>
+                  <Insets left="5.0" top="11.0" />
+               </HBox.margin>
+               <effect>
+                  <DropShadow />
+               </effect>
+            </MenuButton>
+            <GridPane fx:id="buttonPanel" disable="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="20.0" prefHeight="40.0" prefWidth="900.0">
+              <columnConstraints>
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="203.0" minWidth="79.0" prefWidth="128.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="326.0" minWidth="10.0" prefWidth="132.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="313.0" minWidth="10.0" prefWidth="115.0" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="327.0" minWidth="10.0" prefWidth="120.0" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="323.0" minWidth="10.0" prefWidth="132.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="318.0" minWidth="10.0" prefWidth="146.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="318.0" minWidth="10.0" prefWidth="101.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#upload" text="Загрузить">
+                     <GridPane.margin>
+                        <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
+                     </GridPane.margin>
+                  </Button>
+                  <Button fx:id="readFile" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#read" text="Прочитать" GridPane.columnIndex="1">
+                     <GridPane.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </GridPane.margin>
+                  </Button>
+                  <Button fx:id="newDir" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#createNewDir" prefHeight="31.0" prefWidth="222.0" text="Новая папка" GridPane.columnIndex="4">
+                     <GridPane.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </GridPane.margin>
+                  </Button>
+                  <Button fx:id="newFile" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#createNewFile" prefHeight="31.0" prefWidth="163.0" text="Новый файл" GridPane.columnIndex="5">
+                     <GridPane.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </GridPane.margin>
+                  </Button>
+                  <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#download" prefHeight="31.0" prefWidth="235.0" text="Скачать" GridPane.columnIndex="3">
+                     <GridPane.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </GridPane.margin>
+                  </Button>
+               </children>
+               <effect>
+                  <DropShadow />
+               </effect>
+               <padding>
+                  <Insets top="10.0" />
+               </padding>
+            </GridPane>
+         </children>
+      </HBox>
+      <GridPane prefHeight="40.0" prefWidth="1003.0">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="501.0" minWidth="10.0" prefWidth="501.0" />
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="639.0" minWidth="10.0" prefWidth="368.0" />
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="329.0" minWidth="10.0" prefWidth="134.0" />
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints maxHeight="50.0" minHeight="10.0" prefHeight="50.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <Label prefHeight="21.0" prefWidth="444.0" text="Локальный компьютер">
+               <GridPane.margin>
+                  <Insets left="15.0" top="15.0" />
+               </GridPane.margin>
+            </Label>
+            <Label fx:id="serverLabel" prefHeight="36.0" prefWidth="494.0" text="Отсутствует подключение к серверу!" GridPane.columnIndex="1">
+               <padding>
+                  <Insets left="15.0" top="15.0" />
+               </padding>
+            </Label>
+            <Button fx:id="connected" alignment="CENTER_RIGHT" contentDisplay="RIGHT" mnemonicParsing="false" onAction="#connect" prefHeight="27.0" prefWidth="128.0" text="Подключиться" GridPane.columnIndex="2">
+               <GridPane.margin>
+                  <Insets top="10.0" />
+               </GridPane.margin>
+            </Button>
+         </children>
+      </GridPane>
+      <GridPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="431.0" />
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="433.5" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <TextArea fx:id="textArea" editable="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1">
+               <GridPane.margin>
+                  <Insets bottom="10.0" left="5.0" right="10.0" top="10.0" />
+               </GridPane.margin>
+            </TextArea>
+            <ListView fx:id="clientView" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
+               <GridPane.margin>
+                  <Insets bottom="10.0" left="10.0" right="5.0" top="10.0" />
+               </GridPane.margin>
+            </ListView>
+            <ListView fx:id="serverView" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1">
+               <GridPane.margin>
+                  <Insets bottom="10.0" left="5.0" right="10.0" top="10.0" />
+               </GridPane.margin>
+            </ListView>
+         </children>
+         <effect>
+            <DropShadow />
+         </effect>
+      </GridPane>
+      <GridPane maxWidth="1.7976931348623157E308" prefHeight="0.0" prefWidth="903.0" VBox.vgrow="NEVER">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="450.0" prefWidth="450.0" />
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="331.0" prefWidth="417.0" />
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="94.0" prefWidth="136.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints maxHeight="1.7976931348623157E308" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <TextField fx:id="textField" alignment="TOP_LEFT" maxWidth="1.7976931348623157E308" onAction="#sendMsgAction" prefHeight="31.0" prefWidth="460.0" promptText="Введите сообщение ...">
+               <GridPane.margin>
+                  <Insets bottom="10.0" left="10.0" right="5.0" top="10.0" />
+               </GridPane.margin>
+            </TextField>
+            <Label fx:id="clientLabel" maxWidth="1.7976931348623157E308" text="File info" GridPane.columnIndex="1">
+               <GridPane.margin>
+                  <Insets bottom="10.0" left="5.0" right="10.0" top="10.0" />
+               </GridPane.margin>
+            </Label>
+         </children>
+         <effect>
+            <DropShadow />
+         </effect>
+      </GridPane>
+   </children>
+   <effect>
+      <DropShadow />
+   </effect>
+</VBox>

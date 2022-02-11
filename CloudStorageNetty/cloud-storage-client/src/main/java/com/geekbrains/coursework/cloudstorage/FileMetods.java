@@ -4,6 +4,7 @@ import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
+
 import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;
 import java.awt.image.BufferedImage;
@@ -34,13 +35,13 @@ public class FileMetods {
         long size = 0;
         String label;
         if (files != null) {
-            label = files.length + " files in current dir. ";
+            label = files.length + " файлов в папке. ";
             for (File file : files) {
                 size += file.length();
             }
-            label += "Summary size: " + (size / (1024 * 2)) + " Mb.";
+            label += "Общий размер: " + (size / (1024 * 2)) + " Mb.";
         } else {
-            label = "Current dir is empty.";
+            label = "Текущая папка пустая.";
         }
         return label;
     }
@@ -103,7 +104,8 @@ public class FileMetods {
         clientController.textField.requestFocus();
     }
 
-   protected void fillCurrentDirFiles() {
+    protected void fillCurrentDirFiles() {
+
         Platform.runLater(() -> {
             if (clientController.currentDir == null) return;
             clientController.clientView.getItems().clear();
@@ -163,6 +165,7 @@ public class FileMetods {
     }
 
     protected void clickView(ListView<String> currentWindow) {
+
         currentWindow.setOnMouseClicked(e -> {
             if (e.getClickCount() == 1) {
                 if (clientController.clientView.getSelectionModel().getSelectedItem() == null) return;
@@ -201,6 +204,9 @@ public class FileMetods {
             if (e.getClickCount() == 2) {
                 if (clientController.currentDir == null) return;
                 clientController.fileName = currentWindow.getSelectionModel().getSelectedItem();
+                if (clientController.fileName == null) {
+                    return;
+                }
                 if (clientController.fileName.equals("root:\\")) {
                     listLocalDisks();
                     return;

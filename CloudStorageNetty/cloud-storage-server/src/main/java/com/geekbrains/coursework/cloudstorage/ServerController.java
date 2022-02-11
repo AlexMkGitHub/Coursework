@@ -1,5 +1,6 @@
 package com.geekbrains.coursework.cloudstorage;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -30,8 +31,11 @@ public class ServerController implements Initializable {
     }
 
     public void stopServer(ActionEvent actionEvent) {
-        nettyEchoServer.auth.shutdownGracefully();
-        nettyEchoServer.worker.shutdownGracefully();
+        Platform.runLater(() -> {
+            nettyEchoServer.auth.shutdownGracefully();
+            nettyEchoServer.worker.shutdownGracefully();
+        });
+
 
     }
 

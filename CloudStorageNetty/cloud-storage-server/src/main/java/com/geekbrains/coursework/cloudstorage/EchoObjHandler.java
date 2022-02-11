@@ -2,6 +2,7 @@ package com.geekbrains.coursework.cloudstorage;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.socket.SocketChannel;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
@@ -20,22 +21,25 @@ public class EchoObjHandler extends ChannelInboundHandlerAdapter {
     private Path currentFilePath;
     private String fileName;
     private ServerController sc;
+    private SocketChannel channel;
 
-    public EchoObjHandler(ServerController sc) {
+    public EchoObjHandler(ServerController sc, SocketChannel channel) {
+        this.channel = channel;
         this.sc = sc;
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
         log.info("Клиент подключился к серверу!");
-        sc.serverInfo.appendText("Клиент подключился к серверу!\n");
+        sc.serverInfo.appendText("Клиент " + channel.remoteAddress() + " подключился к серверу!\n");
         listServerFile(ctx);
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
-        log.info("Клиент отключился от серврера!");
-        sc.serverInfo.appendText("Клиент отключился от серврера!\n");
+        log.info("Клиент отключился от сервера!");
+        sc.serverInfo.appendText("Клиент " + channel.remoteAddress() + " отключился от серврера!\n");
+        channel.close();
     }
 
     @Override
