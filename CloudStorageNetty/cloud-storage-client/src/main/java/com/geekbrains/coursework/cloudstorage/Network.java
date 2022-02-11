@@ -91,6 +91,8 @@ public class Network {
                                                 clientController.buttonPanel.setDisable(true);
                                                 Platform.runLater(() -> clientController.serverLabel
                                                         .setText("Отсутствует подключение к серверу!"));
+                                                clientController.clientView.refresh();
+                                                clientController.serverView.refresh();
                                                 ctx.channel().close();
                                             }
 

@@ -332,34 +332,23 @@ public class FileMetods {
     }
 
     protected String getFileExtension(String fname) {
-        String ext = ".";
+        String ext;
         int p = fname.lastIndexOf('.');
         if (p > 0) {
             ext = fname.substring(p);
             return ext.toLowerCase();
-        } else {
-            if (p == 0) {
-
-            }
-            return ext = ".dirrrrrrrr1";
         }
+        return ext = ".dirrrrrrrr1";
     }
 
     protected Icon getJSwingIconFromFileSystem(File file) {
-
-        // Windows {
         FileSystemView view = FileSystemView.getFileSystemView();
-        Icon icon = view.getSystemIcon(file);
-
-        icon = view.getSystemIcon(file);
-        return icon;
+        return view.getSystemIcon(file);
     }
 
     protected Image getFileIcon(String fname) {
-
-        Image fileIcon = null;
         String ext = getFileExtension(fname);
-        fileIcon = mapOfFileExtToSmallIcon.get(ext);
+        Image fileIcon = mapOfFileExtToSmallIcon.get(ext);
         if (fileIcon == null) {
             Icon jswingIcon = null;
             File file = new File(fname);
@@ -371,7 +360,6 @@ public class FileMetods {
                     tempFile = File.createTempFile("icon", ext);
                     jswingIcon = getJSwingIconFromFileSystem(tempFile);
                 } catch (IOException ignored) {
-                    // Cannot create temporary file.
                 } finally {
                     if (tempFile != null) tempFile.delete();
                 }
@@ -389,7 +377,6 @@ public class FileMetods {
         }
         return fileIcon;
     }
-
 
     protected Image jswingIconToImage(Icon jswingIcon) {
         BufferedImage bufferedImage = new BufferedImage(jswingIcon.getIconWidth(), jswingIcon.getIconHeight(),
