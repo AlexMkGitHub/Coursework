@@ -4,9 +4,7 @@ import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
-
 import javax.swing.*;
-import javax.swing.filechooser.FileSystemView;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -335,15 +333,26 @@ public class FileMetods {
         String ext;
         int p = fname.lastIndexOf('.');
         if (p > 0) {
-            ext = fname.substring(p);
-            return ext.toLowerCase();
-        }
-        return ext = ".dirrrrrrrr1";
+            ext = fname.substring(p).toLowerCase();
+        } else ext = ".dirrrrrrrr1".toLowerCase();
+        return ext;
     }
 
     protected Icon getJSwingIconFromFileSystem(File file) {
-        FileSystemView view = FileSystemView.getFileSystemView();
-        return view.getSystemIcon(file);
+        Icon icon = null;
+        String extension = ".";
+        int p = file.toString().lastIndexOf('.');
+        if (p > 0) {
+            extension = file.toString().substring(p);
+        }
+        try {
+            file = File.createTempFile("icon", "." + extension);
+            sun.awt.shell.ShellFolder shellFolder = sun.awt.shell.ShellFolder.getShellFolder(file);
+            icon = new ImageIcon(shellFolder.getIcon(true));
+            file.delete();
+        } catch (Exception e) {
+        }
+        return icon;
     }
 
     protected Image getFileIcon(String fname) {
@@ -381,7 +390,6 @@ public class FileMetods {
     protected Image jswingIconToImage(Icon jswingIcon) {
         BufferedImage bufferedImage = new BufferedImage(jswingIcon.getIconWidth(), jswingIcon.getIconHeight(),
                 BufferedImage.TYPE_4BYTE_ABGR_PRE);
-
         jswingIcon.paintIcon(null, bufferedImage.getGraphics(), 0, 0);
         return SwingFXUtils.toFXImage(bufferedImage, null);
     }
