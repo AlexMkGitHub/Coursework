@@ -8,7 +8,9 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
+import javafx.application.Platform;
 import lombok.extern.slf4j.Slf4j;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -67,6 +69,33 @@ public class Network {
                                                 }
                                                 getFile(msg);
                                             }
+
+                                            @Override
+                                            public void channelActive(ChannelHandlerContext ctx) throws Exception {
+                                                clientController.generalPanel.setOpacity(1.0);
+                                                clientController.setChannelActive(true);
+                                                clientController.buttonPanel.setDisable(false);
+                                                clientController.connected.setVisible(false);
+                                                Platform.runLater(() -> clientController.serverLabel
+                                                        .setText("Облачное хранилище."));
+                                                clientController.clientView.refresh();
+                                                clientController.serverView.refresh();
+
+                                            }
+
+                                            @Override
+                                            public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+                                                clientController.generalPanel.setOpacity(1.0);
+                                                clientController.setChannelActive(false);
+                                                clientController.connected.setVisible(true);
+                                                clientController.buttonPanel.setDisable(true);
+                                                Platform.runLater(() -> clientController.serverLabel
+                                                        .setText("Отсутствует подключение к серверу!"));
+                                                clientController.clientView.refresh();
+                                                clientController.serverView.refresh();
+                                                ctx.channel().close();
+                                            }
+
                                         });
                             }
                         });
@@ -93,15 +122,14 @@ public class Network {
         if (ef.getCommand() == null) {
             ef.setCommand("#LIST");
             channel.writeAndFlush(ef);
-            clientController.fillCurrentDirFiles();
+            clientController.fileMetods.fillCurrentDirFiles();
         } else if (ef.getCommand().equals("#GET#FILE")) {
             String fileName = ef.getFileName();
             byte[] bytes = ef.getBytes();
             Files.write(currentDir.toPath().resolve(fileName), bytes);
             ef.setCommand("#LIST");
             channel.writeAndFlush(ef);
-            clientController.fillCurrentDirFiles();
-            log.info("Файл, полученный от клиента, обрабатывается ...");
+            clientController.fileMetods.fillCurrentDirFiles();
         }
 
     }

@@ -11,6 +11,7 @@
     <modules>
         <module>cloud-storage-server</module>
         <module>cloud-storage-client</module>
+        <module>Test</module>
     </modules>
 
     <properties>

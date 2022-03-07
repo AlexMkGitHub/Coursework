@@ -2,39 +2,55 @@ package com.geekbrains.coursework.cloudstorage;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.socket.SocketChannel;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
 public class EchoObjHandler extends ChannelInboundHandlerAdapter {
-    private int byteRead;
-    private static final int SIZE = 256;
-    private volatile int start = 0;
-    private Path serverDir = Paths.get("serverDir").normalize();
-    private File currentDir = new File("serverDir");
+    private File currentDir;
     private FileUploadFile ef;
     private FileUploadFile fileUploadFile;
     private FileUploadFile commandFile;
+    private File currentFile;
+    private Path currentFilePath;
+    private String fileName;
+    private ServerController sc;
+    private SocketChannel channel;
+
+
+    public EchoObjHandler(ServerController sc, SocketChannel channel) {
+        this.channel = channel;
+        this.sc = sc;
+        try {
+            createUserDir("CloudDir");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
 
     @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        log.info("Client connected");
+    public void channelActive(ChannelHandlerContext ctx) {
+        log.info("Клиент подключился к серверу!");
+        sc.serverInfo.appendText("Клиент " + channel.remoteAddress() + " подключился к серверу!\n");
         listServerFile(ctx);
     }
 
     @Override
-    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        log.info("Client disconnected from server!");
+    public void channelInactive(ChannelHandlerContext ctx) {
+        log.info("Клиент отключился от сервера!");
+        sc.serverInfo.appendText("Клиент " + channel.remoteAddress() + " отключился от серврера!\n");
+        channel.close();
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+    public void channelRead(ChannelHandlerContext ctx, Object msg) {
         if (msg instanceof FileUploadFile) {
             fileUploadFile = (FileUploadFile) msg;
 
@@ -58,59 +74,43 @@ public class EchoObjHandler extends ChannelInboundHandlerAdapter {
                 createNewFile(ctx, msg);
             }
         }
-
     }
 
     private void createNewFile(ChannelHandlerContext ctx, Object msg) {
-        ef = (FileUploadFile) msg;
-        String fileName = ef.getFileName();
-        File currentFile = currentDir.toPath().resolve(fileName).toFile();
-        Path currentFilePath = currentDir.toPath().resolve(fileName).normalize();
-        System.out.println(Files.exists(currentFile.toPath()));
-        System.out.println(currentFilePath);
+        getFileInfo(msg);
         if (!Files.exists(currentFile.toPath())) {
             try {
                 Files.createFile(currentFile.toPath());
                 listServerFile(ctx);
-                System.out.println("Создан файл " + fileName);
+                sc.serverInfo.appendText("Создан файл  " + fileName + "\n");
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } else System.out.println("ТАКОЙ ФАЙЛ УЖЕ СОЗДАНА!");
+        } else sc.serverInfo.appendText("ФАЙЛ " + fileName + " УЖЕ СОЗДАН!\n");
     }
 
     private void createNewDir(ChannelHandlerContext ctx, Object msg) {
-        ef = (FileUploadFile) msg;
-        String fileName = ef.getFileName();
-        File currentFile = currentDir.toPath().resolve(fileName).toFile();
-        Path currentFilePath = currentDir.toPath().resolve(fileName).normalize();
-        System.out.println(Files.exists(currentFile.toPath()));
-        System.out.println(currentFilePath);
+        getFileInfo(msg);
         if (!Files.exists(currentFile.toPath())) {
             try {
                 Files.createDirectory(currentFile.toPath());
                 listServerFile(ctx);
-                System.out.println("Создана папка " + fileName);
+                sc.serverInfo.appendText("Создана папка  " + fileName + "\n");
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } else System.out.println("ТАКАЯ ПАПКА УЖЕ СОЗДАНА!");
+        } else sc.serverInfo.appendText("ПАПКА " + fileName + " УЖЕ СОЗДАНА!\n");
     }
 
     private void getFileFromCloud(ChannelHandlerContext ctx, Object msg) {
-        ef = (FileUploadFile) msg;
-        String fileName = ef.getFileName();
-        System.out.println(fileName);
-        File currentFile = currentDir.toPath().resolve(fileName).toFile();
-        Path currentFilePath = currentDir.toPath().resolve(fileName).normalize();
-        System.out.println(currentFile);
+        getFileInfo(msg);
         this.ef = new FileUploadFile();
         ef.setFile(currentFile);
         String currentFileName = currentFile.getName();
         ef.setFileName(currentFileName);
         ef.setStarPos(0);
         ef.setCommand("#GET#FILE");
-        System.out.println(ef.getFileName());
         try {
             currentFilePath = currentFilePath.toAbsolutePath().normalize();
             ef.setBytes(Files.readAllBytes(currentFilePath));
@@ -118,7 +118,7 @@ public class EchoObjHandler extends ChannelInboundHandlerAdapter {
             e.printStackTrace();
         }
         ctx.writeAndFlush(ef);
-        System.out.println("Файл " + fileName + " отправлен.");
+        sc.serverInfo.appendText("Файл " + fileName + " отправлен.\n");
         listServerFile(ctx);
         commandFile = new FileUploadFile();
         commandFile.setCommand("#VISIBLE");
@@ -127,7 +127,7 @@ public class EchoObjHandler extends ChannelInboundHandlerAdapter {
 
     private void addFileInCloud(ChannelHandlerContext ctx, Object msg) {
         ef = (FileUploadFile) msg;
-        String fileName = ef.getFileName();
+        fileName = ef.getFileName();
         byte[] bytes = ef.getBytes();
         try {
             Files.write(currentDir.toPath().resolve(fileName), bytes);
@@ -137,7 +137,7 @@ public class EchoObjHandler extends ChannelInboundHandlerAdapter {
         commandFile = new FileUploadFile();
         commandFile.setCommand("#VISIBLE");
         ctx.writeAndFlush(commandFile);
-        log.info("Файл, полученный от клиента, обрабатывается ...");
+        sc.serverInfo.appendText("Получен файл " + fileName + " \n");
     }
 
     private void listServerFile(ChannelHandlerContext ctx) {
@@ -149,8 +149,23 @@ public class EchoObjHandler extends ChannelInboundHandlerAdapter {
         for (File file : lst) {
             commandFile.setCommand(file.getName());
             ctx.writeAndFlush(commandFile);
-            //ctx.writeAndFlush("lst");
         }
     }
 
+    private void getFileInfo(Object msg) {
+        ef = (FileUploadFile) msg;
+        fileName = ef.getFileName();
+        currentFile = currentDir.toPath().resolve(fileName).toFile();
+        currentFilePath = currentDir.toPath().resolve(fileName).normalize();
+    }
+
+    private void createUserDir(final String dirName) throws IOException {
+        File userDir = new File(System.getProperty("user.home"));
+        currentDir = new File(userDir, dirName);
+        if (!currentDir.exists() && !currentDir.mkdirs()) {
+            throw new IOException("Папка для облака отсутствует: " + currentDir.getAbsolutePath());
+        } else {
+            sc.serverInfo.appendText("Выбрано облачное хранилище " + currentDir.getAbsolutePath() + "\n");
+        }
+    }
 }
